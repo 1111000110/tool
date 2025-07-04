@@ -77,8 +77,6 @@ type WeatherCast struct {
 	NightPower   string `json:"nightpower"`
 }
 
-
-
 // 全局配置变量
 var config Config
 
@@ -112,7 +110,7 @@ func getWeather() (string, error) {
 // 使用高德开放平台API获取天气
 func getAmapWeather() (string, error) {
 	// 构建请求URL
-	url := fmt.Sprintf("https://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=all", 
+	url := fmt.Sprintf("https://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=all",
 		config.WeatherAPI.Key, config.WeatherAPI.CityCode)
 
 	// 发送GET请求
@@ -130,7 +128,7 @@ func getAmapWeather() (string, error) {
 
 	// 解析JSON响应
 	var weatherResp WeatherResponse
-	if err := json.Unmarshal(body, &weatherResp); err != nil {
+	if err = json.Unmarshal(body, &weatherResp); err != nil {
 		return "", fmt.Errorf("解析天气数据失败: %v", err)
 	}
 
@@ -140,20 +138,20 @@ func getAmapWeather() (string, error) {
 	}
 
 	// 获取实时天气
-	url = fmt.Sprintf("https://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=base", 
+	url = fmt.Sprintf("https://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=base",
 		config.WeatherAPI.Key, config.WeatherAPI.CityCode)
-	
+
 	resp, err = http.Get(url)
 	if err != nil {
 		return "", fmt.Errorf("获取实时天气信息失败: %v", err)
 	}
 	defer resp.Body.Close()
-	
+
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("读取实时天气响应内容失败: %v", err)
 	}
-	
+
 	var liveWeatherResp WeatherResponse
 	if err := json.Unmarshal(body, &liveWeatherResp); err != nil {
 		return "", fmt.Errorf("解析实时天气数据失败: %v", err)
@@ -161,10 +159,10 @@ func getAmapWeather() (string, error) {
 
 	// 格式化天气信息
 	var weatherText string
-	
+
 	// 添加标题
 	weatherText += fmt.Sprintf("【%s天气信息】\n\n", config.WeatherAPI.CityName)
-	
+
 	// 实时天气信息
 	if len(liveWeatherResp.Lives) > 0 {
 		live := liveWeatherResp.Lives[0]
@@ -176,67 +174,67 @@ func getAmapWeather() (string, error) {
 		weatherText += fmt.Sprintf("湿度: %s%%\n", live.Humidity)
 		weatherText += fmt.Sprintf("发布时间: %s\n\n", live.ReportTime)
 	}
-	
+
 	// 天气预报
 	if len(weatherResp.Forecasts) > 0 && len(weatherResp.Forecasts[0].Casts) > 0 {
 		weatherText += "【未来天气预报】\n"
-		
+
 		// 获取今天和明天的预报
 		forecasts := weatherResp.Forecasts[0].Casts
-		
+
 		// 今天预报
 		if len(forecasts) > 0 {
 			today := forecasts[0]
 			weatherText += fmt.Sprintf("今天 (%s):\n", today.Date)
-			weatherText += fmt.Sprintf("白天: %s %s℃ %s风 %s级\n", 
+			weatherText += fmt.Sprintf("白天: %s %s℃ %s风 %s级\n",
 				today.DayWeather, today.DayTemp, today.DayWind, today.DayPower)
-			weatherText += fmt.Sprintf("夜间: %s %s℃ %s风 %s级\n\n", 
+			weatherText += fmt.Sprintf("夜间: %s %s℃ %s风 %s级\n\n",
 				today.NightWeather, today.NightTemp, today.NightWind, today.NightPower)
 		}
-		
+
 		// 明天预报
 		if len(forecasts) > 1 {
 			tomorrow := forecasts[1]
 			weatherText += fmt.Sprintf("明天 (%s):\n", tomorrow.Date)
-			weatherText += fmt.Sprintf("白天: %s %s℃ %s风 %s级\n", 
+			weatherText += fmt.Sprintf("白天: %s %s℃ %s风 %s级\n",
 				tomorrow.DayWeather, tomorrow.DayTemp, tomorrow.DayWind, tomorrow.DayPower)
-			weatherText += fmt.Sprintf("夜间: %s %s℃ %s风 %s级\n\n", 
+			weatherText += fmt.Sprintf("夜间: %s %s℃ %s风 %s级\n\n",
 				tomorrow.NightWeather, tomorrow.NightTemp, tomorrow.NightWind, tomorrow.NightPower)
 		}
 	}
-	
+
 	// 添加温馨提示
 	weatherText += "【温馨提示】\n"
-	
+
 	// 根据天气状况给出建议
 	if len(liveWeatherResp.Lives) > 0 {
 		live := liveWeatherResp.Lives[0]
-		
+
 		if contains(live.Weather, []string{"雨", "阵雨", "雷阵雨", "暴雨"}) {
 			weatherText += "今天有雨，出门请记得带伞！\n"
 		}
-		
+
 		if contains(live.Weather, []string{"雪", "阵雪", "暴雪"}) {
 			weatherText += "今天有雪，注意保暖，路面可能湿滑，出行注意安全！\n"
 		}
-		
+
 		if contains(live.Weather, []string{"雾", "霾"}) {
 			weatherText += "今天有雾霾，建议戴口罩出行，减少户外活动时间！\n"
 		}
-		
+
 		// 根据温度给出建议
 		temp := 0
 		fmt.Sscanf(live.Temperature, "%d", &temp)
-		
+
 		if temp <= 5 {
 			weatherText += "天气寒冷，注意保暖，多穿衣服！\n"
 		} else if temp >= 30 {
 			weatherText += "天气炎热，注意防暑降温，多喝水！\n"
 		}
 	}
-	
+
 	weatherText += "祝您一天愉快！\n"
-	
+
 	return weatherText, nil
 }
 
