@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  weather-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weather-bot
+    restart: unless-stopped
+    volumes:
+      # 挂载配置文件，方便修改配置而不需要重新构建镜像
+      - ./config.json:/app/config.json:ro
+    environment:
+      - TZ=Asia/Shanghai

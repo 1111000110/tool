@@ -1,0 +1,14 @@
+{
+  "weather_api": {
+    "key": "726915a2274707078bf0db65ee067322",
+    "city_code": "110000",
+    "city_name": "北京"
+  },
+  "feishu": {
+    "webhook_url": "https://open.feishu.cn/open-apis/bot/v2/hook/a059c069-a6bf-4937-9e61-cf9b2c9c667d"
+  },
+  "schedule": {
+    "hour": 8,
+    "minute": 0
+  }
+}

@@ -1,0 +1,21 @@
+# 编译后的二进制文件
+weather_bot
+weather_bot.exe
+
+# 配置文件（可能包含敏感信息）
+# 注释掉以下行，如果你希望将示例配置文件提交到仓库
+# config.json
+
+# 日志文件
+*.log
+
+# IDE和编辑器文件
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+Thumbs.db

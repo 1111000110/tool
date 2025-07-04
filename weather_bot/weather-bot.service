@@ -1,0 +1,14 @@
+[Unit]
+Description=Weather Bot Service
+After=network.target
+
+[Service]
+Type=simple
+User=nobody
+WorkingDirectory=/path/to/weather_bot
+ExecStart=/path/to/weather_bot/weather_bot
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
